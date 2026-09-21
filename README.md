@@ -57,13 +57,13 @@ POTENTIOMETER     BUTTON 1      BUTTON 2          │              │
 
 ## Current pin map 🔒
 
-| Function               |   GPIO | Stage |
-| ---------------------- | -----: | ----- |
-| Steering servo         | **18** | ✅     |
-| Door servo             | **19** | ✅     |
-| Front lights           | **25** | ✅     |
-| Brake/rear lights      | **27** | ✅     |
-| Steering potentiometer | **34** | 🆕    |
-| Headlight button       | **23** | 🆕    |
-| Door button            | **33** | 🆕    |
+|   GPIO | Function               | Status |
+| -----: | ---------------------- | ------ |
+| **18** | Steering servo         | ✅      |
+| **19** | Door servo             | ✅      |
+| **25** | Front lights           | ✅      |
+| **27** | Brake/rear lights      | ✅      |
+| **34** | Steering potentiometer | ✅      |
+| **23** | Headlight button       | ✅      |
+| **33** | Door button            | ✅      |
 
