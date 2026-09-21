@@ -30,22 +30,72 @@
       "attrs": {
         "horn": "double"
       }
+    },
+
+    {
+      "type": "wokwi-led",
+      "id": "frontLights",
+      "top": 20,
+      "left": 550,
+      "attrs": {
+        "color": "white",
+        "label": "FRONT LIGHTS"
+      }
+    },
+
+    {
+      "type": "wokwi-resistor",
+      "id": "frontResistor",
+      "top": 20,
+      "left": 450,
+      "rotate": 0,
+      "attrs": {
+        "value": "220"
+      }
+    },
+
+    {
+      "type": "wokwi-led",
+      "id": "rearLights",
+      "top": 180,
+      "left": 550,
+      "attrs": {
+        "color": "red",
+        "label": "BRAKE LIGHTS"
+      }
+    },
+
+    {
+      "type": "wokwi-resistor",
+      "id": "rearResistor",
+      "top": 180,
+      "left": 450,
+      "rotate": 0,
+      "attrs": {
+        "value": "220"
+      }
     }
   ],
 
   "connections": [
+    ["esp:TX", "$serialMonitor:RX", "", []],
+    ["esp:RX", "$serialMonitor:TX", "", []],
 
-    [ "esp:TX", "$serialMonitor:RX", "", [] ],
-    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    ["steeringServo:PWM", "esp:18", "green", []],
+    ["steeringServo:V+", "esp:5V", "red", []],
+    ["steeringServo:GND", "esp:GND.1", "black", []],
 
-    [ "steeringServo:PWM", "esp:18", "green", [] ],
-    [ "steeringServo:V+", "esp:5V", "red", [] ],
-    [ "steeringServo:GND", "esp:GND.1", "black", [] ],
+    ["doorServo:PWM", "esp:19", "green", []],
+    ["doorServo:V+", "esp:5V", "red", []],
+    ["doorServo:GND", "esp:GND.2", "black", []],
 
-    [ "doorServo:PWM", "esp:19", "green", [] ],
-    [ "doorServo:V+", "esp:5V", "red", [] ],
-    [ "doorServo:GND", "esp:GND.2", "black", [] ]
+    ["esp:25", "frontResistor:1", "green", []],
+    ["frontResistor:2", "frontLights:A", "green", []],
+    ["frontLights:C", "esp:GND.3", "black", []],
 
+    ["esp:27", "rearResistor:1", "green", []],
+    ["rearResistor:2", "rearLights:A", "green", []],
+    ["rearLights:C", "esp:GND.3", "black", []]
   ],
 
   "serialMonitor": {

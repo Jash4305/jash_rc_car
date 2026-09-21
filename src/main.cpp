@@ -1,92 +1,157 @@
 #include <Arduino.h>
 #include <ESP32Servo.h>
 
-// ===============================
-// SERVO PINS
-// ===============================
+// ==========================================
+// PIN DEFINITIONS
+// ==========================================
 
+// Servos
 const int STEERING_SERVO_PIN = 18;
 const int DOOR_SERVO_PIN = 19;
 
-// ===============================
+// Lights
+const int FRONT_LIGHT_PIN = 25;
+const int BRAKE_LIGHT_PIN = 27;
+
+// ==========================================
 // SERVO OBJECTS
-// ===============================
+// ==========================================
 
 Servo steeringServo;
 Servo doorServo;
 
-// ===============================
-// SETUP
-// ===============================
+// ==========================================
+// LIGHT FUNCTIONS
+// ==========================================
 
-void setup() {
+void setHeadlights(bool state)
+{
+  digitalWrite(FRONT_LIGHT_PIN, state ? HIGH : LOW);
 
-    Serial.begin(115200);
-
-    delay(1000);
-
-    Serial.println();
-    Serial.println("================================");
-    Serial.println("       JASH RC CAR - STAGE 2");
-    Serial.println("================================");
-
-    // Attach steering servo
-    steeringServo.setPeriodHertz(50);
-    steeringServo.attach(STEERING_SERVO_PIN, 1000, 2000);
-
-    // Attach door servo
-    doorServo.setPeriodHertz(50);
-    doorServo.attach(DOOR_SERVO_PIN, 1000, 2000);
-
-    Serial.println("Steering servo attached.");
-    Serial.println("Door servo attached.");
-
-    // Initial positions
-    steeringServo.write(90);
-    doorServo.write(0);
-
-    Serial.println("Steering: CENTER");
-    Serial.println("Door: CLOSED");
-
-    delay(1000);
+  Serial.print("Headlights: ");
+  Serial.println(state ? "ON" : "OFF");
 }
 
-// ===============================
+void setBrakeLights(bool state)
+{
+  digitalWrite(BRAKE_LIGHT_PIN, state ? HIGH : LOW);
+
+  Serial.print("Brake lights: ");
+  Serial.println(state ? "ON" : "OFF");
+}
+
+// ==========================================
+// SETUP
+// ==========================================
+
+void setup()
+{
+  Serial.begin(115200);
+
+  delay(1000);
+
+  Serial.println();
+  Serial.println("================================");
+  Serial.println("       JASH RC CAR - STAGE 3");
+  Serial.println("================================");
+
+  // -------------------------------
+  // Configure lights
+  // -------------------------------
+
+  pinMode(FRONT_LIGHT_PIN, OUTPUT);
+  pinMode(BRAKE_LIGHT_PIN, OUTPUT);
+
+  // Start with lights OFF
+  setHeadlights(false);
+  setBrakeLights(false);
+
+  // -------------------------------
+  // Configure steering servo
+  // -------------------------------
+
+  steeringServo.setPeriodHertz(50);
+  steeringServo.attach(
+      STEERING_SERVO_PIN,
+      1000,
+      2000);
+
+  // -------------------------------
+  // Configure door servo
+  // -------------------------------
+
+  doorServo.setPeriodHertz(50);
+  doorServo.attach(
+      DOOR_SERVO_PIN,
+      1000,
+      2000);
+
+  // -------------------------------
+  // Initial positions
+  // -------------------------------
+
+  steeringServo.write(90);
+  doorServo.write(0);
+
+  Serial.println("Steering: CENTER");
+  Serial.println("Door: CLOSED");
+
+  Serial.println("Lights initialized.");
+}
+
+// ==========================================
 // LOOP
-// ===============================
+// ==========================================
 
-void loop() {
+void loop()
+{
+  // ======================================
+  // HEADLIGHT TEST
+  // ======================================
 
-    // -------------------------------
-    // STEERING TEST
-    // -------------------------------
+  Serial.println();
+  Serial.println("---- HEADLIGHT TEST ----");
 
-    Serial.println("Steering -> LEFT");
-    steeringServo.write(45);
-    delay(1000);
+  setHeadlights(true);
+  delay(2000);
 
-    Serial.println("Steering -> CENTER");
-    steeringServo.write(90);
-    delay(1000);
+  setHeadlights(false);
+  delay(1000);
 
-    Serial.println("Steering -> RIGHT");
-    steeringServo.write(135);
-    delay(1000);
+  // ======================================
+  // BRAKE LIGHT TEST
+  // ======================================
 
-    Serial.println("Steering -> CENTER");
-    steeringServo.write(90);
-    delay(1000);
+  Serial.println();
+  Serial.println("---- BRAKE LIGHT TEST ----");
 
+  setBrakeLights(true);
+  delay(2000);
 
-    // -------------------------------
-    // DOOR TEST
-    // -------------------------------
+  setBrakeLights(false);
+  delay(1000);
 
-    Serial.println("Door -> OPEN");
-    doorServo.write(90);
-    delay(1500);
+  // ======================================
+  // BOTH LIGHTS
+  // ======================================
 
-    Serial.println("Door -> CLOSED");
-    doorServo.write(0);
-    delay(1500);
+  Serial.println();
+  Serial.println("---- ALL LIGHTS ON ----");
+
+  setHeadlights(true);
+  setBrakeLights(true);
+
+  delay(2000);
+
+  // ======================================
+  // ALL LIGHTS OFF
+  // ======================================
+
+  Serial.println();
+  Serial.println("---- ALL LIGHTS OFF ----");
+
+  setHeadlights(false);
+  setBrakeLights(false);
+
+  delay(2000);
 }
