@@ -48,7 +48,6 @@
       "id": "frontResistor",
       "top": 20,
       "left": 450,
-      "rotate": 0,
       "attrs": {
         "value": "220"
       }
@@ -70,32 +69,80 @@
       "id": "rearResistor",
       "top": 180,
       "left": 450,
-      "rotate": 0,
       "attrs": {
         "value": "220"
+      }
+    },
+
+    {
+      "type": "wokwi-potentiometer",
+      "id": "steeringPot",
+      "top": 380,
+      "left": 250,
+      "attrs": {
+        "value": "512",
+        "label": "STEERING"
+      }
+    },
+
+    {
+      "type": "wokwi-pushbutton",
+      "id": "headlightButton",
+      "top": 380,
+      "left": 500,
+      "attrs": {
+        "color": "yellow",
+        "label": "HEADLIGHTS",
+        "key": "H",
+        "bounce": "0"
+      }
+    },
+
+    {
+      "type": "wokwi-pushbutton",
+      "id": "doorButton",
+      "top": 380,
+      "left": 650,
+      "attrs": {
+        "color": "blue",
+        "label": "DOOR",
+        "key": "D",
+        "bounce": "0"
       }
     }
   ],
 
   "connections": [
-    ["esp:TX", "$serialMonitor:RX", "", []],
-    ["esp:RX", "$serialMonitor:TX", "", []],
 
-    ["steeringServo:PWM", "esp:18", "green", []],
-    ["steeringServo:V+", "esp:5V", "red", []],
-    ["steeringServo:GND", "esp:GND.1", "black", []],
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
 
-    ["doorServo:PWM", "esp:19", "green", []],
-    ["doorServo:V+", "esp:5V", "red", []],
-    ["doorServo:GND", "esp:GND.2", "black", []],
+    [ "steeringServo:PWM", "esp:18", "green", [] ],
+    [ "steeringServo:V+", "esp:5V", "red", [] ],
+    [ "steeringServo:GND", "esp:GND.1", "black", [] ],
 
-    ["esp:25", "frontResistor:1", "green", []],
-    ["frontResistor:2", "frontLights:A", "green", []],
-    ["frontLights:C", "esp:GND.3", "black", []],
+    [ "doorServo:PWM", "esp:19", "green", [] ],
+    [ "doorServo:V+", "esp:5V", "red", [] ],
+    [ "doorServo:GND", "esp:GND.2", "black", [] ],
 
-    ["esp:27", "rearResistor:1", "green", []],
-    ["rearResistor:2", "rearLights:A", "green", []],
-    ["rearLights:C", "esp:GND.3", "black", []]
+    [ "esp:25", "frontResistor:1", "green", [] ],
+    [ "frontResistor:2", "frontLights:A", "green", [] ],
+    [ "frontLights:C", "esp:GND.3", "black", [] ],
+
+    [ "esp:27", "rearResistor:1", "green", [] ],
+    [ "rearResistor:2", "rearLights:A", "green", [] ],
+    [ "rearLights:C", "esp:GND.3", "black", [] ],
+
+    [ "steeringPot:VCC", "esp:3V3", "red", [] ],
+    [ "steeringPot:GND", "esp:GND.3", "black", [] ],
+    [ "steeringPot:SIG", "esp:34", "orange", [] ],
+
+    [ "headlightButton:1.r", "esp:23", "green", [] ],
+    [ "headlightButton:2.r", "esp:GND.3", "black", [] ],
+
+    [ "doorButton:1.r", "esp:33", "green", [] ],
+    [ "doorButton:2.r", "esp:GND.3", "black", [] ]
+
   ],
 
   "serialMonitor": {
