@@ -7,11 +7,17 @@
 
 // Servos
 const int STEERING_SERVO_PIN = 18;
-const int DOOR_SERVO_PIN = 19;
+const int DOOR_SERVO_PIN     = 19;
 
 // Lights
-const int FRONT_LIGHT_PIN = 25;
-const int BRAKE_LIGHT_PIN = 27;
+const int FRONT_LIGHT_PIN    = 25;
+const int BRAKE_LIGHT_PIN    = 27;
+
+// Inputs
+const int STEERING_POT_PIN   = 34;
+const int HEADLIGHT_BUTTON   = 23;
+const int DOOR_BUTTON        = 33;
+
 
 // ==========================================
 // SERVO OBJECTS
@@ -20,25 +26,23 @@ const int BRAKE_LIGHT_PIN = 27;
 Servo steeringServo;
 Servo doorServo;
 
+
 // ==========================================
-// LIGHT FUNCTIONS
+// STATE VARIABLES
 // ==========================================
 
-void setHeadlights(bool state)
-{
-  digitalWrite(FRONT_LIGHT_PIN, state ? HIGH : LOW);
+bool headlightsState = false;
+bool brakeLightState  = false;
+bool doorOpenState   = false;
 
-  Serial.print("Headlights: ");
-  Serial.println(state ? "ON" : "OFF");
-}
 
-void setBrakeLights(bool state)
-{
-  digitalWrite(BRAKE_LIGHT_PIN, state ? HIGH : LOW);
+// ==========================================
+// BUTTON STATE
+// ==========================================
 
-  Serial.print("Brake lights: ");
-  Serial.println(state ? "ON" : "OFF");
-}
+bool lastHeadlightButton = HIGH;
+bool lastDoorButton      = HIGH;
+
 
 // ==========================================
 // SETUP
@@ -46,112 +50,237 @@ void setBrakeLights(bool state)
 
 void setup()
 {
-  Serial.begin(115200);
+    Serial.begin(115200);
 
-  delay(1000);
+    delay(1000);
 
-  Serial.println();
-  Serial.println("================================");
-  Serial.println("       JASH RC CAR - STAGE 3");
-  Serial.println("================================");
+    Serial.println();
+    Serial.println("================================");
+    Serial.println("       JASH RC CAR - STAGE 4: Steering, Headlights, and Door Control");
+    Serial.println("================================");
 
-  // -------------------------------
-  // Configure lights
-  // -------------------------------
 
-  pinMode(FRONT_LIGHT_PIN, OUTPUT);
-  pinMode(BRAKE_LIGHT_PIN, OUTPUT);
+    // --------------------------------------
+    // LIGHT OUTPUTS
+    // --------------------------------------
 
-  // Start with lights OFF
-  setHeadlights(false);
-  setBrakeLights(false);
+    pinMode(FRONT_LIGHT_PIN, OUTPUT);
+    pinMode(BRAKE_LIGHT_PIN, OUTPUT);
 
-  // -------------------------------
-  // Configure steering servo
-  // -------------------------------
+    digitalWrite(FRONT_LIGHT_PIN, LOW);
+    digitalWrite(BRAKE_LIGHT_PIN, LOW);
 
-  steeringServo.setPeriodHertz(50);
-  steeringServo.attach(
-      STEERING_SERVO_PIN,
-      1000,
-      2000);
 
-  // -------------------------------
-  // Configure door servo
-  // -------------------------------
+    // --------------------------------------
+    // BUTTON INPUTS
+    // --------------------------------------
 
-  doorServo.setPeriodHertz(50);
-  doorServo.attach(
-      DOOR_SERVO_PIN,
-      1000,
-      2000);
+    pinMode(HEADLIGHT_BUTTON, INPUT_PULLUP);
+    pinMode(DOOR_BUTTON, INPUT_PULLUP);
 
-  // -------------------------------
-  // Initial positions
-  // -------------------------------
 
-  steeringServo.write(90);
-  doorServo.write(0);
+    // --------------------------------------
+    // STEERING SERVO
+    // --------------------------------------
 
-  Serial.println("Steering: CENTER");
-  Serial.println("Door: CLOSED");
+    steeringServo.setPeriodHertz(50);
 
-  Serial.println("Lights initialized.");
+    steeringServo.attach(
+        STEERING_SERVO_PIN,
+        1000,
+        2000
+    );
+
+
+    // --------------------------------------
+    // DOOR SERVO
+    // --------------------------------------
+
+    doorServo.setPeriodHertz(50);
+
+    doorServo.attach(
+        DOOR_SERVO_PIN,
+        1000,
+        2000
+    );
+
+
+    // --------------------------------------
+    // INITIAL POSITION
+    // --------------------------------------
+
+    steeringServo.write(90);
+    doorServo.write(0);
+
+
+    Serial.println("Steering: CENTER");
+    Serial.println("Door: CLOSED");
+    Serial.println("Headlights: OFF");
+    Serial.println();
+
+    Serial.println("Controls:");
+    Serial.println("  POTENTIOMETER -> STEERING");
+    Serial.println("  H -> HEADLIGHTS");
+    Serial.println("  D -> DOOR");
+    Serial.println();
 }
 
+
 // ==========================================
-// LOOP
+// HEADLIGHT CONTROL
+// ==========================================
+
+void toggleHeadlights()
+{
+    headlightsState = !headlightsState;
+    brakeLightState = !brakeLightState;
+
+    digitalWrite(
+        FRONT_LIGHT_PIN,
+        headlightsState ? HIGH : LOW
+    );
+    digitalWrite(
+        BRAKE_LIGHT_PIN,
+        brakeLightState ? HIGH : LOW
+    );
+
+    Serial.print("Headlights: ");
+
+    if (headlightsState)
+    {
+        Serial.println("ON");
+    }
+    else
+    {
+        Serial.println("OFF");
+    }
+
+    Serial.print("Brakelights: ");
+
+    if (brakeLightState)
+    {
+        Serial.println("ON");
+    }
+    else
+    {
+        Serial.println("OFF");
+    }
+}
+
+
+// ==========================================
+// DOOR CONTROL
+// ==========================================
+
+void toggleDoor()
+{
+    doorOpenState = !doorOpenState;
+
+    if (doorOpenState)
+    {
+        doorServo.write(90);
+
+        Serial.println("Door: OPEN");
+    }
+    else
+    {
+        doorServo.write(0);
+
+        Serial.println("Door: CLOSED");
+    }
+}
+
+
+// ==========================================
+// STEERING CONTROL
+// ==========================================
+
+void updateSteering()
+{
+    int potValue = analogRead(STEERING_POT_PIN);
+
+    // ESP32 ADC = 0 to 4095
+    int steeringAngle = map(
+        potValue,
+        0,
+        4095,
+        45,
+        135
+    );
+
+    steeringAngle = constrain(
+        steeringAngle,
+        45,
+        135
+    );
+
+    steeringServo.write(steeringAngle);
+
+    // Print occasionally so terminal doesn't flood
+    static int lastPrintedAngle = -1;
+
+    if (abs(steeringAngle - lastPrintedAngle) >= 5)
+    {
+        Serial.print("Steering angle: ");
+        Serial.print(steeringAngle);
+        Serial.print("° | ADC: ");
+        Serial.println(potValue);
+
+        lastPrintedAngle = steeringAngle;
+    }
+}
+
+
+// ==========================================
+// MAIN LOOP
 // ==========================================
 
 void loop()
 {
-  // ======================================
-  // HEADLIGHT TEST
-  // ======================================
+    // --------------------------------------
+    // READ STEERING
+    // --------------------------------------
 
-  Serial.println();
-  Serial.println("---- HEADLIGHT TEST ----");
+    updateSteering();
 
-  setHeadlights(true);
-  delay(2000);
 
-  setHeadlights(false);
-  delay(1000);
+    // --------------------------------------
+    // HEADLIGHT BUTTON
+    // --------------------------------------
 
-  // ======================================
-  // BRAKE LIGHT TEST
-  // ======================================
+    bool currentHeadlightButton =
+        digitalRead(HEADLIGHT_BUTTON);
 
-  Serial.println();
-  Serial.println("---- BRAKE LIGHT TEST ----");
+    if (
+        lastHeadlightButton == HIGH &&
+        currentHeadlightButton == LOW
+    )
+    {
+        toggleHeadlights();
+    }
 
-  setBrakeLights(true);
-  delay(2000);
+    lastHeadlightButton =
+        currentHeadlightButton;
 
-  setBrakeLights(false);
-  delay(1000);
 
-  // ======================================
-  // BOTH LIGHTS
-  // ======================================
+    // --------------------------------------
+    // DOOR BUTTON
+    // --------------------------------------
 
-  Serial.println();
-  Serial.println("---- ALL LIGHTS ON ----");
+    bool currentDoorButton =
+        digitalRead(DOOR_BUTTON);
 
-  setHeadlights(true);
-  setBrakeLights(true);
+    if (
+        lastDoorButton == HIGH &&
+        currentDoorButton == LOW
+    )
+    {
+        toggleDoor();
+    }
 
-  delay(2000);
+    lastDoorButton =
+        currentDoorButton;
 
-  // ======================================
-  // ALL LIGHTS OFF
-  // ======================================
 
-  Serial.println();
-  Serial.println("---- ALL LIGHTS OFF ----");
-
-  setHeadlights(false);
-  setBrakeLights(false);
-
-  delay(2000);
+    delay(20);
 }
