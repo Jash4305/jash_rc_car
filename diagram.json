@@ -1,19 +1,55 @@
 {
   "version": 1,
-  "author": "Anonymous maker",
+  "author": "Jash",
   "editor": "wokwi",
+
   "parts": [
     {
       "type": "board-esp32-devkit-c-v4",
       "id": "esp",
-      "top": -76.8,
-      "left": 43.24,
+      "top": 0,
+      "left": 0,
       "attrs": {}
+    },
+
+    {
+      "type": "wokwi-servo",
+      "id": "steeringServo",
+      "top": -20,
+      "left": 260,
+      "attrs": {
+        "horn": "single"
+      }
+    },
+
+    {
+      "type": "wokwi-servo",
+      "id": "doorServo",
+      "top": 180,
+      "left": 260,
+      "attrs": {
+        "horn": "double"
+      }
     }
   ],
+
   "connections": [
-    ["esp:TX", "$serialMonitor:RX", "", []],
-    ["esp:RX", "$serialMonitor:TX", "", []]
+
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+
+    [ "steeringServo:PWM", "esp:18", "green", [] ],
+    [ "steeringServo:V+", "esp:5V", "red", [] ],
+    [ "steeringServo:GND", "esp:GND.1", "black", [] ],
+
+    [ "doorServo:PWM", "esp:19", "green", [] ],
+    [ "doorServo:V+", "esp:5V", "red", [] ],
+    [ "doorServo:GND", "esp:GND.2", "black", [] ]
+
   ],
-  "dependencies": {}
+
+  "serialMonitor": {
+    "display": "terminal",
+    "convertEol": true
+  }
 }
